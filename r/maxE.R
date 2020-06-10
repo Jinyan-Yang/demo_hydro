@@ -169,7 +169,7 @@ ui <- fluidPage(
                            min=500, max=5000, value=1500, step=100),
                sliderInput("r.root", "Mean radius of water absorbing roots (m):",
                            min=0.0001, max=0.001, value=0.0005, step=0.0001),
-               sliderInput("k.plant", "plant hydraulic conductance (mol m–2 s–1):",
+               sliderInput("k.plant", "plant hydraulic conductance (mol m–2 MPa-1 s–1):",
                            min=0.02, max=0.1, value=0.02, step=0.01),
                sliderInput("r.l", "Root radius (m):",
                            min=0.1, max=2, value=0.5, step=0.1),

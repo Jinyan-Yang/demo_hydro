@@ -45,6 +45,19 @@ tmp.ls= lapply(tmp.ls,get.norm.func)
 
 ros.pd.df.norm = do.call(rbind,tmp.ls)
 
+# we could also fit for g1 but there's dry and wet treatment
+# library(plantecophys)
+# 
+# ros.pd.df.norm$group = paste0(ros.pd.df.norm$gxDate,'_',ros.pd.df.norm$Species)
+# 
+# g1.vec=fitBBs(ros.pd.df.norm,'group',gsmodel='BBOpti',
+#       varnames = list(ALEAF = "Photo", GS = "Cond", VPD = "VpdL",
+#                       Ca = "CO2S"))
+# g1.fit.df = coef(g1.vec)
+# 
+# ros.pd.df.norm.g1 = merge(ros.pd.df.norm,g1.fit.df[,c('group','g1')],all.x =T)
+
+pdf('reduction of gs over swc.pdf',width = 8,height = 8*0.618)
 # makes plots####
 with(ros.pd.df.norm,plot(gs.norm~TDR,col=Species,pch=16))
 # plot gam fits to each species of the raw data
@@ -59,4 +72,5 @@ for (i in  seq_along(soil.par.df$type)) {
         points(e.frac.ls[[i]]~c(swc.vec * 100),
                type='l',col = 'grey')
 }
+dev.off()
 
