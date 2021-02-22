@@ -14,6 +14,16 @@ server <- function(input, output, session) {
   # main function to calculate net gain and make plot
   plotSperryt_fun <- function(input){
     
+    # ###### example for debuging#####
+    # input <- data.frame(kl=4 ,
+    #                     psis=-0.01,
+    #                     VPD=1.5,
+    #                     Jmax=160,
+    #                     Vcmax=100,
+    #                     sf=10,
+    #                     psif=-5,
+    #                     Ca = 400)
+    
     # plc curve Weilbull
     KPfnc <- function(P, SX, PX,X=50){
       
@@ -79,17 +89,6 @@ server <- function(input, output, session) {
       opt.target <- profit.func(psil,kl, psis,VPD,Jmax,Vcmax, sf, psif,Ca,psi.crit) - cost.func(psil, sf, psif,psi.crit)
       return(opt.target)
     }
-    
-    
-    ###### example for debuging#####
-    # input <- data.frame(kl=4 ,
-    #                     psis=-0.01,
-    #                     VPD=1.5,
-    #                     Jmax=160,
-    #                     Vcmax=100,
-    #                     sf=10,
-    #                     psif=-5,
-    #                     Ca = 400)
 
     # calculate the critical PsiL as the PSil that gives max transpiration
     pt.value <- optimize(e.supply,c(-7,0),
@@ -119,30 +118,65 @@ server <- function(input, output, session) {
     # plots
     par(mfrow=c(1,1), mar=c(5,5,1,1))
     # plot profit
-    curve(profit.func(psil = x, 
-                      kl=input$kl, 
-                      psis=input$psis,
-                      sf=input$sf,
-                      psif=input$psif,
-                      Ca = input$Ca,
-                      VPD=input$VPD,
-                      Jmax=input$Jmax,
-                      Vcmax=input$Vcmax,
-                      psi.crit = pt.value), 
-          xlab="LWP (MPa)",
-          ylab="Relative gain/loss",
-          from=pt.value, to=-0.05, 
-          lwd=2,
-          ylim=c(0,1))
-    # plot cost
-    curve(cost.func(x,sf=input$sf,psif=input$psif,psi.crit = pt.value),
-          add=TRUE, lwd=1, lty='dotted',ylim=c(0,1))
-
-    # add optima
+    
+    psil.vec <- seq(pt.value,input$psis,by=0.1)
+    
+    profit.vec <- c()
+    cost.vec <- c()
+    for (i in seq_along(psil.vec)){
+      profit.vec[i] <- profit.func(psil = psil.vec[i], 
+                                   kl=input$kl, 
+                                   psis=input$psis,
+                                   sf=input$sf,
+                                   psif=input$psif,
+                                   Ca = input$Ca,
+                                   VPD=input$VPD,
+                                   Jmax=input$Jmax,
+                                   Vcmax=input$Vcmax,
+                                   psi.crit = pt.value)
+      
+      cost.vec[i] <- cost.func(psil.vec[i],sf=input$sf,psif=input$psif,psi.crit = pt.value)
+      
+    }
+    
+    
+    plot(profit.vec~psil.vec,xlab="LWP (MPa)",
+         ylab="Relative gain/loss",
+         lwd=2,
+         ylim=c(0,1),type='l')
+    
+    points(cost.vec~psil.vec,lwd=2, lty='dotted',type='l')
+    
+    points(c(profit.vec-cost.vec)~psil.vec,lwd=2, lty=1,type='l',col='red')
+    
     abline(v = opti.results$par,lty='dashed',col='grey',lwd=2)
     
-    legend('bottomleft',legend=c('Carbon gain','Hydraulic cost'),lty=c('solid','dotted'),bty='n')
+    legend('bottom',legend=c('Carbon gain','Hydraulic cost','Net gain'),lty=c('solid','dotted','solid'),bty='n',col=c('black','black','red'))
     
+    # curve(profit.func(psil = x, 
+    #                   kl=input$kl, 
+    #                   psis=input$psis,
+    #                   sf=input$sf,
+    #                   psif=input$psif,
+    #                   Ca = input$Ca,
+    #                   VPD=input$VPD,
+    #                   Jmax=input$Jmax,
+    #                   Vcmax=input$Vcmax,
+    #                   psi.crit = pt.value), 
+    #       xlab="LWP (MPa)",
+    #       ylab="Relative gain/loss",
+    #       from=pt.value, to=-0.05, 
+    #       lwd=2,
+    #       ylim=c(0,1))
+    # # plot cost
+    # curve(cost.func(x,sf=input$sf,psif=input$psif,psi.crit = pt.value),
+    #       add=TRUE, lwd=1, lty='dotted',ylim=c(0,1))
+    # 
+    # # add optima
+    # abline(v = opti.results$par,lty='dashed',col='grey',lwd=2)
+    # 
+    # legend('bottomleft',legend=c('Carbon gain','Hydraulic cost'),lty=c('solid','dotted'),bty='n')
+
   }
   
   output$Sperryplot <- renderPlot(
