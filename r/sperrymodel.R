@@ -38,13 +38,37 @@ server <- function(input, output, session) {
       return(relk)
     }
     
-    # plant water suuply
-    e.supply <- function(psil, kl, psis,sf, psif){
+    # # plant water suuply
+    e.supply.old <- function(psil, kl, psis,sf, psif){
       # change k as a function of psi
         kl.use = kl * KPfnc(psil,sf, psif)
-      
+
       return(kl.use * (psis - psil))
     }
+    # # 
+    # # plant water suuply in integral way
+    e.supply <- function(psil, kl, psis,sf, psif){
+    
+      x <-  integrate(KPfnc,psil,psis,SX=sf,PX=psif)
+       
+      y <- kl * x$value
+      
+      return(y)
+    }
+    
+    # test difference between the two functions
+    # psil.vec <- seq(-3,-1,by=0.1)
+    # 
+    # loss.old.vec <- loss.vec <- c()
+    # 
+    # for(i in seq_along(psil.vec)){
+    #   loss.old.vec[i] <- e.supply.old(psil=psil.vec[i], kl = 1, psis=-0.1,sf=10, psif=-2)
+    #   loss.vec[i] <- e.supply(psil=psil.vec[i], kl = 1, psis=-0.1,sf=10, psif=-2)
+    # }
+    # 
+    # 
+    # plot(loss.vec~psil.vec,col='red')
+    # points(loss.old.vec~psil.vec)
     
     # get gs based on transpiration
     cal.gs.func <- function(psil,kl, psis,VPD,sf, psif,Patm = 101){
